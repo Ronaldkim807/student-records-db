@@ -1,0 +1,24 @@
+EXPLAIN ANALYZE
+SELECT c.course_code, COUNT(e.enrollment_id) as enrollment_count
+FROM acad.courses c
+LEFT JOIN acad.enrollments e ON c.course_id = e.course_id
+WHERE e.enrolled_on BETWEEN '2023-01-01' AND '2023-12-31'
+GROUP BY c.course_code
+ORDER BY enrollment_count DESC;
+
+Data output:
+"Sort  (cost=1.25..1.26 rows=1 width=15) (actual time=0.099..0.105 rows=0 loops=1)"
+"  Sort Key: (count(e.enrollment_id)) DESC"
+"  Sort Method: quicksort  Memory: 25kB"
+"  ->  HashAggregate  (cost=1.23..1.24 rows=1 width=15) (actual time=0.090..0.095 rows=0 loops=1)"
+"        Group Key: c.course_code"
+"        Batches: 1  Memory Usage: 24kB"
+"        ->  Hash Join  (cost=0.01..1.23 rows=1 width=15) (actual time=0.087..0.092 rows=0 loops=1)"
+"              Hash Cond: (c.course_id = e.course_id)"
+"              ->  Seq Scan on courses c  (cost=0.00..1.15 rows=15 width=15) (never executed)"
+"              ->  Hash  (cost=0.00..0.00 rows=1 width=16) (actual time=0.031..0.035 rows=0 loops=1)"
+"                    Buckets: 1024  Batches: 1  Memory Usage: 8kB"
+"                    ->  Seq Scan on enrollments_2023 e  (cost=0.00..0.00 rows=1 width=16) (actual time=0.030..0.030 rows=0 loops=1)"
+"                          Filter: ((enrolled_on >= '2023-01-01'::date) AND (enrolled_on <= '2023-12-31'::date))"
+"Planning Time: 0.697 ms"
+"Execution Time: 0.214 ms"
